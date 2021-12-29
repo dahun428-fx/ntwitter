@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from 'react';
-import Router from 'components/Router';
+import Router from 'Components/Router';
 import { authService } from 'fbInstance';
 import 'antd/dist/antd.css';
 

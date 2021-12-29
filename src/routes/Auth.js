@@ -1,10 +1,11 @@
 import axios from 'axios';
-import Popup from 'components/common/Popup';
+import Popup from 'Components/common/Popup';
 import { authService } from 'fbInstance';
 import { loginWithGithub } from 'github-oauth-popup';
 import React, { useState } from 'react';
 
 function Auth(){
+
 
     const [ Email, setEmail ] = useState("");
     const [ Password, setPassword ] = useState("");
