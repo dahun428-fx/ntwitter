@@ -1,37 +1,38 @@
 import React, {useEffect, useState} from 'react';
 import { DB_NTWIEET_COLLECTION_NAME } from 'Config/DBServiceConfig';
 import {dbService} from 'fbInstance';
+import Ntweet from './Ntweet';
+const {NtweetObject} = require('../models/Nwteet');
 
-function Home(){
+function Home(props){
 
     const [ Tweet, setTweet ] = useState("");
     const [ Tweets, setTweets ] = useState([]);
-    const [ IsLoading, setIsLoading ] = useState(true);
+    const [ User, setUser ] = useState(props.User);
 
-    useEffect(() => {
-        getTweets();
-    }, []);
-    const getTweets = async () => {
-        const datas = await getFirebaseCollectionDataArray(DB_NTWIEET_COLLECTION_NAME);
-        setTweets(datas);
-        getFirebaseSnapshot(datas);
-    }
+    useEffect(()=>{
+        getNtweets();
+    },[]);
     const onChangeHandler = (e) => {
         const { target : {name, value }} = e;
         if(name === "tweet") {
             setTweet(value);
         }
     }
-
     const onSubmitHanlder = (e) => {
         e.preventDefault();
-        let data = {
-            ntweet : Tweet,
-            createdAt : Date.now(),
+        if(!User){
+            return false;
         }
-        addFirebaseCollection(data);
+        let nwteetObj = new NtweetObject(Tweet, User.uid);
+        addFirebaseCollection(nwteetObj.getObject());
         setTweet("");
     }
+    const getNtweets = async () => {
+        getFirebaseSnapshot();
+    }
+    
+    // 한번만 접근.
     const getFirebaseCollectionDataArray = async (collection_name) => {
         switch(collection_name){
             case DB_NTWIEET_COLLECTION_NAME :
@@ -41,51 +42,31 @@ function Home(){
                 const query = dbService.query(collection, dbService.orderBy("createdAt","desc"));
                 try {
                     const querySnapshot = await dbService.getDocs(query);
-                    querySnapshot.forEach((item) => {
-                        datas.push(item.data());
-                    });
+                    return querySnapshot;
                 } catch (error) {
                     console.log(error);
                 }
-                return datas;
+                return false;
             default :
             break;
         }
     }
-    const getFirebaseSnapshot = (datas) => {
-        console.log('IsLoading : ',IsLoading);
+    const getFirebaseSnapshot = () => {
         const db = dbService.getFirestore();
         const collection = dbService.collection(db, DB_NTWIEET_COLLECTION_NAME);
         const query = dbService.query(collection, dbService.orderBy("createdAt","desc"));
-        dbService.onSnapshot(query, (s) => {
-            // let datas = [];
-           s.docChanges().forEach((change) => {
-               if(change.type === "added" ){
-                   let newData = change.doc.data();
-                   console.log('newData',newData);
-                   //    datas = datas.concat(newData);
-                   //    console.log(newData);
-                   //    let newDatas = [...Tweets].concat([...newData]);
-                   //    console.log('newDatas',newDatas);
-                   //    setTweets(newDatas);
-                   // console.log('newData : ',newData);
-                   // setTweets
-                   //    return change.doc.data();
-                   // datas.push(change.doc.data());
+        const unsub = dbService.onSnapshot(query, (s) => {
+            const newArray = s.docs.map((doc) => {
+                return {
+                    id : doc.id,
+                    ...doc.data(),
                 }
-            }) 
-            console.log('datas', datas);
-        //    return datas;
-           //    setTweets([...Tweets,...datas]);
-           //    console.log('tweets' , Tweets);
-        //    console.log('datas', datas);
-        //    setTweets(datas);
-        //    console.log('tweets', tweets);
-        //    setTweets(tweets.concat(datas));
-        })
+            })
+            setTweets(newArray);
+        });
+        //접속 해제.
+        return ()=>unsub();
     }
-
-
     const addFirebaseCollection = async (data) => {
         const db = dbService.getFirestore();
         const collection = dbService.collection(db, DB_NTWIEET_COLLECTION_NAME);
@@ -96,6 +77,49 @@ function Home(){
         }
     
     }
+    // const onClickHanlder = async (creatorId, e) => {
+    //     const {target : {name, value}} = e;
+    //     let ntweetId = value;
+    //     try {
+    //         console.log('creatorId',creatorId)
+    //         console.log(creatorId, User.uid);
+    //         if(creatorId !== User.uid){
+    //             throw new Error("등록한 사용자가 아닙니다.");
+    //         }
+    //         const db = dbService.getFirestore();
+    //         const ntweet = await dbService.doc(db, DB_NTWIEET_COLLECTION_NAME, ntweetId);
+    //         switch(name){
+    //             case "delete" : 
+    //                 return deleteTweet(ntweet);
+    //             case "update" :
+    //                 return updateTweet(ntweet);
+    //             default :
+    //                 break;
+    //         }
+
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
+    // const deleteTweet = async (ntweet) => {
+    //     console.log('delete', ntweet);
+    //     try {
+    //         await dbService.deleteDoc(ntweet);
+    //         console.log(ntweet);
+    //     } catch (error){
+    //         throw error;
+    //     }
+    // }
+    // const updateTweet = async (ntweet) => {
+    //     console.log('update', ntweet);
+    //     try {
+    //         await dbService.updateDoc(ntweet, {
+    //             text : 'updated',
+    //         })
+    //     } catch (error){
+    //         throw error;
+    //     }
+    // }
 
     return (
         <div>
@@ -105,9 +129,9 @@ function Home(){
             </form>
             <div>
                 {Tweets &&
-                    Tweets.map((item, index) => {
+                    Tweets.map((item) => {
                         return (
-                            <p key={index}>{item.ntweet}</p>
+                            <Ntweet key={item.id} Ntweet={item} IsOwner={props.User.uid === item.creatorId} />
                         )
                     })
                 }

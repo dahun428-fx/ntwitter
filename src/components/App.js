@@ -7,10 +7,12 @@ function App() {
   
   const [ Init, setInit ] = useState(false);
   const [ IsLoggedIn, setIsLoggedIn ] = useState(false);
+  const [ User, setUser ] = useState(null);
   useEffect(()=>{
     authService.getAuth().onAuthStateChanged((user)=>{
       if(user){
         setIsLoggedIn(true);
+        setUser(user);
       } else {
         setIsLoggedIn(false);
       }
@@ -19,8 +21,8 @@ function App() {
   },[]);
   return (
     <>
-    {Init &&
-      <Router isLoggedIn={IsLoggedIn}/>
+    {Init && User &&
+      <Router isLoggedIn={IsLoggedIn} User={User}/>
     }
     </>
   );
