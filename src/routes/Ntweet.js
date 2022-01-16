@@ -1,83 +1,116 @@
-import { DB_NTWIEET_COLLECTION_NAME } from 'Config/DBServiceConfig';
-import { dbService } from 'fbInstance';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { NtweetObject } from 'models/Nwteet';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 function Ntweet(props){
+
     const [ Ntweet, setNtweet ] = useState(props.Ntweet);
-    const [ IsOwner, setIsOwner ] = useState(props.IsOwner);
+    const [ IsOwner ] = useState(props.IsOwner);
     const [ Editing, setEditing ] = useState(false);
     const [ NewNwteetText, setNewNwteetText ] = useState(props.Ntweet.text);
+    const [ NewImageSrc, setNewImageSrc ] = useState("");
+    const [ OriginFileName, setOriginFileName ] = useState("");
+    const NewFileRef = useRef(null);
 
     useEffect(()=>{
         setNtweet(props.Ntweet);
     },[props.Ntweet]);
+
     const toggleEditing = () => {
         setEditing((prev)=>!prev);
     }
     const onClickDelete = async (e) => {
-        let ntweetId = Ntweet.id;
-        let type = "delete";
-        progressTweet(ntweetId, type);
+        const ok = window.confirm("정말로 삭제하시겠습니까?");
+        if(!ok) return false;
+        progressTweet(Ntweet.id, "delete");
+    }
+
+    const onClickPhotoDelete = async (e) => {
+        console.log('delete');
+        let ok = window.confirm('해당 파일을 삭제하시겠습니까?');
+        if(!ok) return false;
+        await progressTweet(Ntweet.id, "delete_photo");
+        clearImage();
     }
     const progressTweet = async (ntweetId, type) => {
         try {
             if(!IsOwner){
                 throw new Error("등록한 사용자가 아닙니다.");
             }
-            const db = dbService.getFirestore();
-            const ntweet = await dbService.doc(db, DB_NTWIEET_COLLECTION_NAME, ntweetId);
+            const ntweetObject = new NtweetObject(Ntweet, Ntweet.creatorId);
+            const ntweet = await ntweetObject.getNweetById(ntweetId);
+
             switch(type){
+                case "delete_photo" :
+                    ntweetObject.setAttachment('');
+                    ntweetObject.setText(NewNwteetText);
+                    await ntweetObject.deleteFile(Ntweet);
+                    return await ntweetObject.updateNtweet(ntweet, ntweetObject.getObject());
                 case "delete" : 
-                    return deleteTweet(ntweet);
+                    if(Ntweet.attachment){
+                        await ntweetObject.deleteFile(Ntweet);
+                    }
+                    return ntweetObject.deleteNtweet(ntweet);
                 case "update" :
-                    return updateTweet(ntweet);
+                    let file = '';
+                    if(NewFileRef.current){
+                        file = NewFileRef.current.files[0];
+                    }
+                    let attachmentObject = Ntweet.attachment ? Ntweet.attachment : '';
+                    if(file){
+                        attachmentObject = await ntweetObject.uploadFile(file, NewImageSrc);
+                    } 
+                    ntweetObject.setAttachment(attachmentObject);
+                    ntweetObject.setText(NewNwteetText);
+                    return await ntweetObject.updateNtweet(ntweet,ntweetObject.getObject());
                 default :
                     break;
             }
-    
         } catch (error) {
-            console.log(error);
-        }
-        
-    }
-    const deleteTweet = async (ntweet) => {
-        const ok = window.confirm("정말로 삭제하시겠습니까?");
-        if(!ok) return false;
-        try {
-            await dbService.deleteDoc(ntweet);
-        } catch (error){
-            throw error;
-        }
-    }
-    const updateTweet = async (ntweet) => {
-        try {
-            await dbService.updateDoc(ntweet, {
-                text : NewNwteetText,
-            })
-        } catch (error){
             console.log(error);
         }
     }
     const onSubmitHanlder = async (e) => {
         e.preventDefault();
-        let ntweetId = Ntweet.id; 
-        let type = "update";
-        progressTweet(ntweetId, type);
+        await progressTweet(Ntweet.id, "update");
         setEditing(false);
     }
     const onChangeHanlder = (e) => {
-        const { target : {name, value }} = e;
+        const { target : {name, value, files }} = e;
         if(name === "ntweet"){
             setNewNwteetText(value);
+        } else if( name === "tweet_image"){
+            let file = files[0];
+            imagePreview(file);
         }
     }
+    const imagePreview = (file) => {
+        let reader = new FileReader();
+        let filename = file.name;
+        reader.onloadend = () => {
+            setNewImageSrc(reader.result);
+            setOriginFileName(filename);
+        }
+        reader.readAsDataURL(file);
+    }
+    const clearImage = () => {
+        setTimeout(()=>{
+            if(NewFileRef.current){
+                NewFileRef.current.value = null; 
+            }
+            setNewImageSrc("");
+        },1000);
+    }
+
+
     return (
         <>
         { Ntweet &&
-            <div>
-                { Editing ? (
+            <div className="nweet">
+                { Editing && IsOwner ? (
                     <>
-                        <form onSubmit={onSubmitHanlder}>
+                        <form onSubmit={onSubmitHanlder} className="container nweetEdit">
                             <input
                                 value={NewNwteetText} 
                                 onChange={onChangeHanlder}
@@ -86,19 +119,51 @@ function Ntweet(props){
                                 required
                                 placeholder='Edit your ntweets'
                             />
-                            <button type='submit'>Update ntweet</button>
+                            {
+                                Ntweet.attachment ? (
+                                <div>
+                                    <img alt={OriginFileName} src={Ntweet.attachment.attachmentUrl} width={`50px`} height={`50px`}/>
+                                    <input type='button' onClick={onClickPhotoDelete}>x</input>
+                                </div>)
+                                 :
+                                (
+                                <>
+                                <input 
+                                    type="file" 
+                                    name="tweet_image"
+                                    accept="image/*"
+                                    onChange={onChangeHanlder}
+                                    ref={NewFileRef}
+                                />
+                                    { NewImageSrc && 
+                                        <div>
+                                            <h4>{OriginFileName}</h4>
+                                            <img src={NewImageSrc} alt={OriginFileName} width="50px" height="50px" />
+                                            <button type='button' onClick={clearImage}>Clear</button>
+                                        </div>
+                                    }
+                                </>
+                                )
+                            }
+                            <button type='submit' className="formBtn">Update ntweet</button>
                         </form>
-                        <button type='button' onClick={toggleEditing}>Cancle</button>
+                        <button type='button' onClick={toggleEditing} className="formBtn cancelBtn">Cancle</button>
                     </>
                 ) : (
                         <>
+                        {
+                            Ntweet.attachment && 
+                            <div>
+                                <img alt={OriginFileName} src={Ntweet.attachment.attachmentUrl} width={`50px`} height={`50px`}/>
+                            </div>
+                        }
                             <h4>{Ntweet.text}</h4>
                             {
                                 IsOwner &&
-                                <>
-                                    <button name="delete" value={Ntweet.id} onClick={onClickDelete}>delete Ntweet</button>
-                                    <button onClick={toggleEditing}>eidt Ntweet</button>
-                                </>
+                                <div class="nweet__actions">
+                                    <span name="delete" value={Ntweet.id} onClick={onClickDelete}><FontAwesomeIcon icon={faTrash} /></span>
+                                    <span onClick={toggleEditing}><FontAwesomeIcon icon={faPencilAlt} /></span>
+                                </div>
                             }
                         </>
                     )

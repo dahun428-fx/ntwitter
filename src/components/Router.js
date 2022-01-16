@@ -10,12 +10,19 @@ function _router(props){
     
     return (
         <Router>
-            { props.isLoggedIn && <Navigation />}
-            <Routes>
+            { props.isLoggedIn && <Navigation User={props.User} />}
+            <Routes style={{
+                    maxWidth: 890,
+                    width: "100%",
+                    margin: "0 auto",
+                    marginTop: 80,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}>
                 { props.isLoggedIn ? 
                 <>
                     <Route exact path="/" element={<Home User={props.User} />} />
-                    <Route exact path="/profile" element={<Profile />} />
+                    <Route exact path="/profile" element={<Profile refreshUser={props.refreshUser} User={props.User}/>} />
                 </>
                 :
                     <Route exact path="/" element={<Auth />} />
