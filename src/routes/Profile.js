@@ -1,11 +1,12 @@
 import { authService } from 'fbInstance';
-import { NtweetObject } from 'models/Nwteet';
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Ntweet from './Ntweet';
 
+const  NtweetObject = require('models/Ntweet');
 function Profile(props){
-    const [ User, setUser ] = useState(props.User);
+    const [ User ] = useState(props.User);
     const [ DisplayName, setDisplayName ] = useState(props.User.displayName ? props.User.displayName : "");
     const [ MyNtweets, setMyNtweets ] = useState([]);
     const navigate = useNavigate();

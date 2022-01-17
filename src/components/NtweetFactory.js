@@ -1,7 +1,6 @@
-import { NtweetObject } from 'models/Nwteet';
 import React, { useRef, useState } from 'react';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+const  NtweetObject = require('models/Ntweet');
+
 function NtweetFactory(props){
     const [ User ] = useState(props.User);
     const [ Tweet, setTweet ] = useState("");

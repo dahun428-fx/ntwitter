@@ -1,8 +1,4 @@
-import axios from 'axios';
 import AuthForm from 'Components/AuthForm';
-import Popup from 'Components/common/Popup';
-import { authService } from 'fbInstance';
-import { loginWithGithub } from 'github-oauth-popup';
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -31,7 +27,6 @@ function Auth(){
                 <button name="github" className="authBtn" onClick={onClickHandler}>Continue with Github  <FontAwesomeIcon icon={faGithub} /></button>
                 <button name="facebook" className="authBtn" onClick={onClickHandler}>Continue with Facebook</button>
             </div>
-            
         </div>
     )
 }

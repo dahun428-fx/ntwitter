@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { NtweetObject } from 'models/Nwteet';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+const  NtweetObject = require('models/Ntweet');
 
 function Ntweet(props){
 

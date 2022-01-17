@@ -1,8 +1,6 @@
-import Checkbox from 'antd/lib/checkbox/Checkbox';
-import axios from 'axios';
+// import axios from 'axios';
 import { authService } from 'fbInstance';
-import { loginWithGithub } from 'github-oauth-popup';
-import { NtweetObject } from 'models/Nwteet';
+// import { loginWithGithub } from 'github-oauth-popup';
 import React, { useEffect, useState } from 'react';
 import Popup from './common/Popup';
 function AuthForm(props){
@@ -36,14 +34,11 @@ function AuthForm(props){
     }, [props.ClickState]);
 
     const pendingLogin = async (password) => {
-        const ntweetObject = new NtweetObject();
         const auth = authService.getAuth();
-        // console.log(password, ProviderEmail, ProviderAccessToken, ProviderId);
         const email = ProviderEmail;
         const accesstoken = ProviderAccessToken;
         const providerId = ProviderId;
         const credential = await getFirebaseCredentialByProviderIdAndAccessToken(providerId, accesstoken);
-        // console.log(email, accesstoken, providerId, credential);
         try {
             await authService.signInWithEmailAndPassword(auth, email, password).catch((error)=>{throw error});
             if(auth.currentUser){
@@ -93,18 +88,18 @@ function AuthForm(props){
             showModal();
         }
     }
-    const getCredentialResult = (result, providerId) => {
-        switch (providerId) {
-            case authService.GoogleAuthProvider.PROVIDER_ID :
-                return authService.GoogleAuthProvider.credentialFromResult(result);
-            case authService.GithubAuthProvider.PROVIDER_ID :
-                return authService.GithubAuthProvider.credentialFromResult(result);
-            case authService.FacebookAuthProvider.PROVIDER_ID :
-                return authService.FacebookAuthProvider.credentialFromResult(result);
-            default :
-                break;
-        }
-    }
+    // const getCredentialResult = (result, providerId) => {
+    //     switch (providerId) {
+    //         case authService.GoogleAuthProvider.PROVIDER_ID :
+    //             return authService.GoogleAuthProvider.credentialFromResult(result);
+    //         case authService.GithubAuthProvider.PROVIDER_ID :
+    //             return authService.GithubAuthProvider.credentialFromResult(result);
+    //         case authService.FacebookAuthProvider.PROVIDER_ID :
+    //             return authService.FacebookAuthProvider.credentialFromResult(result);
+    //         default :
+    //             break;
+    //     }
+    // }
     const getFirebaseCredentialByProviderIdAndAccessToken = async (providerId, accesstoken) => {
         switch(providerId) {
             case authService.GoogleAuthProvider.PROVIDER_ID:
@@ -143,45 +138,45 @@ function AuthForm(props){
         setPromptUserPwd("");
         setModalOpen(true);
     }
-    const githubLogin = async () => {
-        const SERVER_GIT_URL = `http://localhost:5000/api/login/github`;
-        let clientId = 'cf8e11d14d3938f79fac';
-        let params = {client_id : clientId, scope : ['read:user,user:email']};
-        const auth = authService.getAuth();
+    // const githubLogin = async () => {
+    //     const SERVER_GIT_URL = `http://localhost:5000/api/login/github`;
+    //     let clientId = 'cf8e11d14d3938f79fac';
+    //     let params = {client_id : clientId, scope : ['read:user,user:email']};
+    //     const auth = authService.getAuth();
         
-            try{
-                //pop 으로 git oauth login
-                const accesstoken = await loginWithGithub(params).then( async (res) => { 
-                    let code = res.code;
-                    // //server 로부터 git accesstoken get
-                    let accesstoken = await axios.post(`${SERVER_GIT_URL}/auth/accessToken`,{code}).then((res)=>{return res.data.accesstoken});
-                    return accesstoken;
-                });
-                localStorage.setItem('git_accesstoken', accesstoken);
-                // //firebase credential 값 변경
-                const credential = await authService.GithubAuthProvider.credential(accesstoken);
-                // //git oauth 값으로 회원가입 및 로그인
-                return await authService.signInWithCredential(auth, credential).then((result)=>{return result});
+    //         try{
+    //             //pop 으로 git oauth login
+    //             const accesstoken = await loginWithGithub(params).then( async (res) => { 
+    //                 let code = res.code;
+    //                 // //server 로부터 git accesstoken get
+    //                 let accesstoken = await axios.post(`${SERVER_GIT_URL}/auth/accessToken`,{code}).then((res)=>{return res.data.accesstoken});
+    //                 return accesstoken;
+    //             });
+    //             localStorage.setItem('git_accesstoken', accesstoken);
+    //             // //firebase credential 값 변경
+    //             const credential = await authService.GithubAuthProvider.credential(accesstoken);
+    //             // //git oauth 값으로 회원가입 및 로그인
+    //             return await authService.signInWithCredential(auth, credential).then((result)=>{return result});
                 
-            } catch(error){
-                //기존 회원과 git oauth 회원이 동일할 경우 ( 이메일로 인증 )
-                if (error.code === 'auth/account-exists-with-different-credential') { 
-                    // //git oauth 로부터 email get
-                    const email = await axios.post(`${SERVER_GIT_URL}/auth/user/emails`, {token : localStorage.getItem("git_accesstoken")}).then((res) => {return res.data.data[0].email});
-                    //해당하는 이메일이 firebase 에 있는지 확인.
-                    const methods = await authService.fetchSignInMethodsForEmail(auth, email).then((methods)=>{return methods});
-                    if(methods[0] === 'password'){
-                        //비밀번호 확인 모달 open
-                        showModal();
-                    }
-                } else {
-                    let message = printError(error);
-                    setHasError(true);
-                    setErrorMsg(message);
-                }
-            }
+    //         } catch(error){
+    //             //기존 회원과 git oauth 회원이 동일할 경우 ( 이메일로 인증 )
+    //             if (error.code === 'auth/account-exists-with-different-credential') { 
+    //                 // //git oauth 로부터 email get
+    //                 const email = await axios.post(`${SERVER_GIT_URL}/auth/user/emails`, {token : localStorage.getItem("git_accesstoken")}).then((res) => {return res.data.data[0].email});
+    //                 //해당하는 이메일이 firebase 에 있는지 확인.
+    //                 const methods = await authService.fetchSignInMethodsForEmail(auth, email).then((methods)=>{return methods});
+    //                 if(methods[0] === 'password'){
+    //                     //비밀번호 확인 모달 open
+    //                     showModal();
+    //                 }
+    //             } else {
+    //                 let message = printError(error);
+    //                 setHasError(true);
+    //                 setErrorMsg(message);
+    //             }
+    //         }
 
-    }
+    // }
     const onChangeHanlder = (e) => {
         let {target : {name, value}} = e;
         switch(name){
@@ -317,7 +312,7 @@ function AuthForm(props){
         }
     }
     return (
-        <div>
+        <div style={{width:'500px', margin:'200px auto'}}>
             <form onSubmit={onSubmitHanlder} className="container">
                 <input 
                     name="email"
