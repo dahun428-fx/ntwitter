@@ -118,12 +118,13 @@ function Ntweet(props){
                                 type="text"
                                 required
                                 placeholder='Edit your ntweets'
+                                className="formInput"
                             />
                             {
                                 Ntweet.attachment ? (
                                 <div>
                                     <img alt={OriginFileName} src={Ntweet.attachment.attachmentUrl} width={`50px`} height={`50px`}/>
-                                    <input type='button' onClick={onClickPhotoDelete}>x</input>
+                                    <button onClick={onClickPhotoDelete} className="formBtn">x</button>
                                 </div>)
                                  :
                                 (
@@ -133,13 +134,14 @@ function Ntweet(props){
                                     name="tweet_image"
                                     accept="image/*"
                                     onChange={onChangeHanlder}
+                                    className="formInput"
                                     ref={NewFileRef}
                                 />
                                     { NewImageSrc && 
                                         <div>
                                             <h4>{OriginFileName}</h4>
                                             <img src={NewImageSrc} alt={OriginFileName} width="50px" height="50px" />
-                                            <button type='button' onClick={clearImage}>Clear</button>
+                                            <button type='button' onClick={clearImage} className="formBtn">Clear</button>
                                         </div>
                                     }
                                 </>
@@ -160,7 +162,7 @@ function Ntweet(props){
                             <h4>{Ntweet.text}</h4>
                             {
                                 IsOwner &&
-                                <div class="nweet__actions">
+                                <div className="nweet__actions">
                                     <span name="delete" value={Ntweet.id} onClick={onClickDelete}><FontAwesomeIcon icon={faTrash} /></span>
                                     <span onClick={toggleEditing}><FontAwesomeIcon icon={faPencilAlt} /></span>
                                 </div>

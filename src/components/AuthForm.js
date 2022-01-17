@@ -312,7 +312,7 @@ function AuthForm(props){
         }
     }
     return (
-        <div style={{width:'500px', margin:'200px auto'}}>
+        <div style={{width:'500px', margin:'100px auto'}}>
             <form onSubmit={onSubmitHanlder} className="container">
                 <input 
                     name="email"
@@ -345,7 +345,6 @@ function AuthForm(props){
                     className="authInput authSubmit"
                     disabled={SubmitBtnLoading}
                 />
-            </form>
             <div>
                 <input 
                     type="checkbox" 
@@ -357,6 +356,7 @@ function AuthForm(props){
                 />
                 <label>회원가입</label>
             </div>
+            </form>
             {
                 HasError &&
                 <div className="authError">{ErrorMsg}</div>

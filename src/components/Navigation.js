@@ -1,13 +1,16 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 function Navigation (props){
+    
+    const [ DisplayName, setDisplayName ] = useState("");
 
-    const [ DisplayName ] = useState(props.User.displayName ? props.User.displayName : "");
-
+    useEffect(()=>{
+        setDisplayName(props.User.displayName ? props.User.displayName : "")
+    },[props.User])
     return (
         <nav>
             <ul style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
@@ -27,9 +30,11 @@ function Navigation (props){
                           }}
                     >
                          <FontAwesomeIcon icon={faUser} color={"#04AAFF"} size="2x" />
-                         <span style={{ marginTop: 10 }}>
-                            {DisplayName}{DisplayName ? "'s" : ''} Profile
-                         </span>
+                         {  DisplayName &&
+                            <span style={{ marginTop: 10 }}>
+                                {DisplayName}{DisplayName ? "'s" : 'My'} Profile
+                            </span>
+                         }
                     </Link>
                 </li>
             </ul>

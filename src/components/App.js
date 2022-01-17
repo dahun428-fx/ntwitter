@@ -26,7 +26,7 @@ function App() {
   },[]);
   const refreshUser = () => {
     const user = authService.getAuth().currentUser;
-    console.log(user);
+    // console.log(user);
     // setUser({
     //   displayName : user.displayName,
     //   uid : user.uid,
