@@ -83,7 +83,6 @@ function AuthForm(props){
     const firebaseFetchSignInMethodsForEmail = async (email) => {
         const auth = authService.getAuth();
         const methods = await authService.fetchSignInMethodsForEmail(auth,email);
-        console.log(methods[0]);
         if(methods[0] === 'password'){
             showModal();
         }
@@ -289,7 +288,7 @@ function AuthForm(props){
                 default :
                     break;
             }
-            result = await authService.signInWithPopup(auth, provider).then((res)=>{console.log(res)});
+            result = await authService.signInWithPopup(auth, provider);
             // user = result.user;
             // credential = getCredentialResult(result, providerId);
             // token = credential.accessToken;

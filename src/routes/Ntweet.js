@@ -27,7 +27,6 @@ function Ntweet(props){
     }
 
     const onClickPhotoDelete = async (e) => {
-        console.log('delete');
         let ok = window.confirm('해당 파일을 삭제하시겠습니까?');
         if(!ok) return false;
         await progressTweet(Ntweet.id, "delete_photo");
