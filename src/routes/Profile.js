@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Ntweet from './Ntweet';
 
-const  NtweetObject = require('models/Ntweet');
+const  {NtweetObject} = require('models/Ntweet');
 function Profile(props){
     const [ User ] = useState(props.User);
     const [ DisplayName, setDisplayName ] = useState(props.User.displayName ? props.User.displayName : "");

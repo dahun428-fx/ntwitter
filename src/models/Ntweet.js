@@ -2,7 +2,7 @@ const { DB_NTWIEET_COLLECTION_NAME } = require('Config/DBServiceConfig');
 const {v4 : uuidv4} = require('uuid');
 const {dbService, storageService, authService} = require('../fbInstance');
 
-module.exports = class NtweetObject {
+module.exports.NtweetObject = class NtweetObject {
     constructor(Text, CreatorId, Attachment = ''){
         this.text = Text;
         this.creatorId = CreatorId;
