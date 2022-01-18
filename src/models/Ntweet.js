@@ -135,4 +135,4 @@ class NtweetObject {
 
 }
 
-module.exports = NtweetObject;
+module.exports.NtweetObject = NtweetObject;

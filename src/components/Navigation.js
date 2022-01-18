@@ -9,7 +9,9 @@ function Navigation (props){
     const [ DisplayName, setDisplayName ] = useState("");
 
     useEffect(()=>{
-        setDisplayName(props.User.displayName ? props.User.displayName : "")
+        if(props.User){
+            setDisplayName(props.User.displayName ? props.User.displayName : "")
+        }
     },[props.User])
     return (
         <nav>
